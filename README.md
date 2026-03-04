@@ -1,142 +1,147 @@
-# 💼 Full-Stack Billing System
+# Brandbox Facturation Backend
 
-A modern full-stack billing application built with **NestJS**, **Prisma**, and **Next.js App Router**, designed with clean architecture, financial precision, and scalability in mind.
+Backend API for internal billing system (Devis & Factures).
 
----
+Built with:
 
-## 🧱 Tech Stack
-
-### Backend
-- NestJS
-- Prisma ORM
-- PostgreSQL
-- Jest (e2e testing)
-- Prisma.Decimal for financial precision
-- UUID-based user system
-
-### Frontend
-- Next.js (App Router)
-- TypeScript
-- Tailwind CSS
-- TanStack Query
-- ISR (Incremental Static Regeneration)
-- Redis-ready architecture
-- Custom JWT authentication (in progress)
+* NestJS
+* Prisma
+* MySQL
+* JWT (HTTP-only cookies)
+* Helmet
+* Throttler
+* Class Validator
 
 ---
 
-# 🚀 Backend Overview
+# 🚀 Features
 
-The backend is a transactional billing system with strict relational integrity and financial accuracy.
+## Authentication
 
-## 📦 Modules
+* JWT stored in HTTP-only cookie
+* Secure cookie in production
+* SameSite strategy based on environment
+* Login rate-limited
+* Logout endpoint clears cookie properly
 
-### 👤 User
-- UUID primary key
-- Unique username
-- Password storage (bcrypt-ready)
-- Full CRUD
-- Duplicate protection
-- Fully tested
+## Security
 
-### 🏢 Tier (Client)
-- Full CRUD
-- Linked to documents
-- Foreign key integrity
-- Cascade-ready structure
+* Helmet enabled
+* Global rate limiting (ThrottlerGuard)
+* Global ValidationPipe:
 
-### 📄 Document (Invoice / Quote)
-- Custom generated IDs:
-  - `FAC-03-2026-001`
-  - `DEV-03-2026-001`
-- Supports:
-  - FACTURE
-  - DEVIS
-- VAT support
-- Currency handling
-- Status management
-- Auto financial recalculation
-- Transaction-safe operations
-
-### 🧾 Designation (Line Items)
-- Monthly sequential ID:
-  - `DES-03-2026-001`
-- Decimal-safe financial math
-- Automatic recalculation of:
-  - totalHT
-  - TVA
-  - totalTTC
-- Fully transactional
+  * whitelist: true
+  * forbidNonWhitelisted: true
+* Required JWT_SECRET environment variable
 
 ---
 
-## 🧮 Financial Integrity
+# 🗄 Database
 
-- All monetary values use `Prisma.Decimal`
-- All create/update/delete operations wrapped in database transactions
-- Accurate VAT computation
-- Automatic totals synchronization
+## Models
 
----
+* User
+* Tier (Client / Fournisseur / Both)
+* Document (Devis / Facture)
+* Designation
+* Sequence tables
 
-## 🧪 Testing
+## Data Integrity
 
-Comprehensive e2e test suite covering:
+* Cascading deletes on relations
+* Unique constraints where required
+* Controlled document status transitions
 
-- Tier lifecycle
-- Document lifecycle
-- Designation lifecycle
-- User lifecycle
-- VAT recalculation logic
-- Constraint validation
-- Relational safety
+## Index Optimization
 
-All tests passing ✅
+Indexes added for performance:
 
----
+Document:
 
-# ⚡ Frontend Architecture
+* type
+* (type, devisStatus)
+* (type, factureStatus)
+* date
 
-Built using Next.js App Router with a scalable and secure structure.
+These optimize:
 
-## 📁 Folder Structure
-- src/
-- app/
-- (auth)/
-- (dashboard)/
-- components/
-- lib/
-- hooks/
-- types/
-- middleware.ts
-
-### Architecture Principles
-
-- Route groups for logical separation
-- Dedicated API abstraction layer
-- TanStack Query for server state
-- Middleware-ready authentication
-- ISR-ready rendering
-- Fully customizable authentication UI
+* Devis listing
+* Facture listing
+* Status filtering
+* Date sorting
 
 ---
 
-# 🔐 Authentication (Next Phase)
+# 🧪 Testing
 
-Planned architecture:
-
-- JWT-based authentication
-- HttpOnly cookie storage
-- NestJS Auth module
-- Next.js middleware route protection
-- Custom login UI
+* e2e tests implemented
+* Clean Prisma shutdown lifecycle
+* Test DB separated from dev DB
+* Sequential execution recommended (--runInBand)
 
 ---
 
-# 🎯 Project Status
+# ⚙️ Environment Variables
 
-✅ Backend complete  
-✅ Full test coverage  
-✅ Frontend structured  
-🔐 Authentication module next  
+Required:
 
+```
+DATABASE_URL=
+JWT_SECRET=
+NODE_ENV=
+```
+
+Production:
+
+* NODE_ENV=production enables secure cookies
+
+---
+
+# 🏗 Development
+
+Run migrations:
+
+```
+npx prisma migrate dev
+```
+
+Reset database (development only):
+
+```
+npx prisma migrate reset
+```
+
+Run backend:
+
+```
+npm run start:dev
+```
+
+Run tests:
+
+```
+npm run test
+```
+
+---
+
+# 📦 Deployment Notes
+
+* Use `prisma migrate deploy` in production
+* Ensure HTTPS for secure cookies
+* Configure CORS to frontend domain
+* Set strong JWT_SECRET
+
+---
+
+# 🏁 Status
+
+Backend is:
+
+* Structurally stable
+* Security hardened
+* Indexed for performance
+* Migration aligned
+* Production-ready
+
+Further changes should only be bug fixes or feature extensions.

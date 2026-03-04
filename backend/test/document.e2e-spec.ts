@@ -31,12 +31,10 @@ describe('Full Billing System (e2e)', () => {
   });
 
   afterAll(async () => {
+    
     await prisma.$disconnect();
     await app.close();
   });
-  
-
-
 
   it('1️⃣ Create Tier', async () => {
     const res = await request(app.getHttpServer())

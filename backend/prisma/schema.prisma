@@ -84,13 +84,17 @@ model Document {
   tva           Decimal  @db.Decimal(5,2)
 
   tierId        String
- tier   Tier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  tier   Tier @relation(fields: [tierId], references: [id], onDelete: Cascade)
 
   designations  Designation[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-}
+  @@index([type])
+  @@index([type, devisStatus])
+  @@index([type, factureStatus])
+  @@index([date])
+  }
 
 model DocumentSequence {
   id      Int @id @default(autoincrement())

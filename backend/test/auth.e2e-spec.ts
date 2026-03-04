@@ -35,14 +35,13 @@ describe('🔐 Auth Module (e2e)', () => {
   });
 
   afterAll(async () => {
+     if (agent && agent.close) {
+    agent.close();
+  }
     await prisma.user.deleteMany();
     await prisma.$disconnect();
     await app.close();
   });
-
-  // ===============================
-  // AUTH TESTS
-  // ===============================
 
   it('🟢 Should register user', async () => {
     await prisma.user.deleteMany();
@@ -85,6 +84,7 @@ describe('🔐 Auth Module (e2e)', () => {
       .expect(201);
 
     expect(res.body.message).toBe('Login successful');
+    expect(res.headers['set-cookie']).toBeDefined();
   });
 
   it('🔴 Should NOT access /auth/me without login', async () => {
@@ -106,5 +106,31 @@ describe('🔐 Auth Module (e2e)', () => {
 
     expect(res.body.username).toBe(testUser.username);
     expect(res.body.userId).toBeDefined();
+  });
+
+  it('🚪 Should logout successfully and block protected routes', async () => {
+    await prisma.user.deleteMany();
+
+    // Register
+    await request(app.getHttpServer())
+      .post('/user')
+      .send(testUser);
+
+    // Login
+    await agent.post('/auth/login').send(testUser).expect(201);
+
+    // Confirm access works
+    await agent.get('/auth/me').expect(200);
+
+    // Logout
+    const logoutRes = await agent.post('/auth/logout').expect(201);
+
+    expect(logoutRes.body.message).toBe('Logout successful');
+    expect(logoutRes.headers['set-cookie'][0]).toContain(
+      'access_token=;',
+    );
+
+    // Now access should fail
+    await agent.get('/auth/me').expect(401);
   });
 });
