@@ -6,6 +6,7 @@ import { DesignationModule } from './designation/designation.module'
 import { DocumentModule } from './document/document.module'
 import { PrismaModule } from './prisma/prisma.module'
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
@@ -15,6 +16,7 @@ import { UserModule } from './user/user.module';
     DocumentModule,
     PrismaModule,
     UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
