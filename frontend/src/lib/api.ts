@@ -1,15 +1,35 @@
-const BASE_URL = process.env.NEST_BASEURL
+const BASE = process.env.NEST_BASEURL ?? "http://localhost:3000";
 
-export const api = async (endpoint: string, options?: RequestInit) => {
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
+// Single configured fetch wrapper used by every hook.
+// credentials: "include" ensures the httpOnly cookie is sent
+// automatically on every request — this is what triggers the
+// JwtAuthGuard in NestJS and what causes the guard to re-sign
+// a fresh cookie (sliding 15min expiry on activity).
+
+export const api = async (
+  endpoint: string,
+  options?: RequestInit
+): Promise<unknown> => {
+  const res = await fetch(`${BASE}${endpoint}`, {
     ...options,
-    credentials: 'include',
+    credentials: "include",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...options?.headers,
     },
-  })
+  });
 
-  if (!res.ok) throw new Error(await res.text())
-  return res.json()
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ message: res.statusText }));
+    throw new Error(error?.message ?? "Une erreur est survenue.");
+  }
+  if (res.status === 401) {
+  // Session expired — kick them back to login
+  window.location.href = "/";
+  throw new Error("Session expirée. Veuillez vous reconnecter.");
 }
+
+  if (res.status === 204) return null;
+
+  return res.json();
+};

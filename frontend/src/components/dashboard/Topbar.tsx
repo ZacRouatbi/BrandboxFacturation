@@ -2,6 +2,7 @@
 
 import { Sun, Moon, Bell } from "lucide-react";
 import { useTheme } from "@/providers/ThemeProvider";
+import { useMe } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 
 interface TopbarProps {
@@ -10,6 +11,12 @@ interface TopbarProps {
 
 export default function Topbar({ title }: TopbarProps) {
   const { dark, toggleDark } = useTheme();
+  const { data: user }       = useMe();
+
+  // Derive initials from username — falls back to "BB" while loading
+  const initials = user?.username
+    ? user.username.slice(0, 2).toUpperCase()
+    : "BB";
 
   return (
     <header
@@ -19,7 +26,7 @@ export default function Topbar({ title }: TopbarProps) {
           : "border-amber-100 bg-white/60 backdrop-blur-xl"
       }`}
     >
-      {/* Page title */}
+      {/* Page title — re-animates on every navigation */}
       <motion.h2
         key={title}
         initial={{ opacity: 0, x: -10 }}
@@ -30,7 +37,6 @@ export default function Topbar({ title }: TopbarProps) {
         {title}
       </motion.h2>
 
-      {/* Right actions */}
       <div className="flex items-center gap-2">
         {/* Notifications */}
         <button
@@ -56,15 +62,16 @@ export default function Topbar({ title }: TopbarProps) {
           {dark ? <Sun size={16} /> : <Moon size={16} />}
         </button>
 
-        {/* User avatar */}
+        {/* User avatar — shows real initials from useMe() */}
         <div
+          title={user?.username}
           className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-bold ${
             dark
               ? "border-neutral-700 bg-neutral-800 text-[#FBAE17]"
               : "border-amber-200 bg-amber-50 text-[#FBAE17]"
           }`}
         >
-          BB
+          {initials}
         </div>
       </div>
     </header>

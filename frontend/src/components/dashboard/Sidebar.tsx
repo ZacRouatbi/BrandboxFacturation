@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTheme } from "@/providers/ThemeProvider";
+import { useLogout, useMe } from "@/hooks/useAuth";
 import {
   LayoutDashboard,
   Users,
@@ -12,20 +13,23 @@ import {
   Receipt,
   LogOut,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
-  { href: "/dashboard",             label: "Tableau de bord", icon: LayoutDashboard },
-  { href: "/dashboard/clients",     label: "Clients",          icon: Users           },
-  { href: "/dashboard/fournisseurs",label: "Fournisseurs",     icon: Truck           },
-  { href: "/dashboard/devis",       label: "Devis",            icon: FileText        },
-  { href: "/dashboard/facture",     label: "Factures",         icon: Receipt         },
+  { href: "/dashboard",              label: "Tableau de bord", icon: LayoutDashboard },
+  { href: "/dashboard/clients",      label: "Clients",          icon: Users           },
+  { href: "/dashboard/fournisseurs", label: "Fournisseurs",     icon: Truck           },
+  { href: "/dashboard/devis",        label: "Devis",            icon: FileText        },
+  { href: "/dashboard/facture",      label: "Factures",         icon: Receipt         },
 ];
 
 export default function Sidebar() {
-  const { dark } = useTheme();
-  const pathname = usePathname();
+  const { dark }                       = useTheme();
+  const pathname                       = usePathname();
+  const { data: user }                 = useMe();
+  const { mutate: logout, isPending }  = useLogout();
 
   return (
     <aside
@@ -56,7 +60,7 @@ export default function Sidebar() {
         </AnimatePresence>
       </div>
 
-      {/* Nav */}
+      {/* Nav items */}
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active =
@@ -69,7 +73,7 @@ export default function Sidebar() {
               <motion.div
                 whileHover={{ x: 3 }}
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-200 ${
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-200 ${
                   active
                     ? "bg-[#FBAE17] text-black shadow-lg shadow-[#FBAE17]/20"
                     : dark
@@ -86,17 +90,37 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Logout */}
+      {/* User chip + logout */}
       <div className={`border-t p-3 ${dark ? "border-neutral-800" : "border-amber-100"}`}>
+        {user && (
+          <div className={`mb-2 flex items-center gap-3 rounded-xl px-3 py-2 ${
+            dark ? "bg-neutral-800/50" : "bg-amber-50/50"
+          }`}>
+            <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+              dark ? "bg-neutral-700 text-[#FBAE17]" : "bg-amber-100 text-[#FBAE17]"
+            }`}>
+              {user.username.slice(0, 2).toUpperCase()}
+            </div>
+            <span className={`truncate text-xs font-medium ${dark ? "text-neutral-300" : "text-neutral-600"}`}>
+              {user.username}
+            </span>
+          </div>
+        )}
+
         <button
-          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-200 ${
+          onClick={() => logout()}
+          disabled={isPending}
+          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-200 disabled:opacity-50 ${
             dark
               ? "text-neutral-400 hover:bg-neutral-800 hover:text-red-400"
               : "text-neutral-500 hover:bg-red-50 hover:text-red-500"
           }`}
         >
-          <LogOut size={18} />
-          <span>Déconnexion</span>
+          {isPending
+            ? <Loader2 size={18} className="animate-spin" />
+            : <LogOut size={18} />
+          }
+          <span>{isPending ? "Déconnexion…" : "Déconnexion"}</span>
         </button>
       </div>
     </aside>
