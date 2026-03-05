@@ -1,0 +1,5 @@
+export type TierRole = 'CLIENT' | 'FOURNISSEUR' | 'BOTH'
+export type DocumentType = 'DEVIS' | 'FACTURE'
+export type DevisStatus = 'ON_HOLD' | 'ACCEPTED' | 'CANCELLED'
+export type FactureStatus = 'NOT_PAID' | 'PAID'
+export type Currency = 'EUR' | 'TND' | 'USD'
