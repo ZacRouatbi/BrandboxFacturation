@@ -2,8 +2,8 @@
 
 import { useTheme } from "@/providers/ThemeProvider";
 import { motion } from "framer-motion";
-import { Search, Plus } from "lucide-react";
-import { useState, ReactNode } from "react";
+import { Search, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useMemo, ReactNode } from "react";
 
 interface Column<T> {
   key: keyof T | string;
@@ -21,6 +21,12 @@ interface DataTableProps<T> {
   addLabel?: string;
   searchPlaceholder?: string;
   searchKeys?: (keyof T)[];
+  isLoading?: boolean;
+  isError?: boolean;
+  // Server-side pagination props
+  page?:       number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
 }
 
 export default function DataTable<T extends { id: string | number }>({
@@ -32,17 +38,98 @@ export default function DataTable<T extends { id: string | number }>({
   addLabel = "Nouveau",
   searchPlaceholder = "Rechercher...",
   searchKeys = [],
+  isLoading = false,
+  isError = false,
+  page = 1,
+  totalPages = 1,
+  onPageChange,
 }: DataTableProps<T>) {
   const { dark } = useTheme();
   const [query, setQuery] = useState("");
 
-  const filtered = query.trim()
-    ? data.filter((row) =>
-        searchKeys.some((key) =>
-          String(row[key]).toLowerCase().includes(query.toLowerCase())
+  // Client-side search filters the current page's data only
+  const filtered = useMemo(() =>
+    query.trim()
+      ? data.filter((row) =>
+          searchKeys.some((key) =>
+            String(row[key]).toLowerCase().includes(query.toLowerCase())
+          )
         )
-      )
-    : data;
+      : data,
+  [query, data, searchKeys]);
+
+  // Generate page numbers to show — always show first, last, current ±1
+  const pageNumbers = useMemo(() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages: (number | "...")[] = [1];
+    if (page > 3) pages.push("...");
+    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+      pages.push(i);
+    }
+    if (page < totalPages - 2) pages.push("...");
+    pages.push(totalPages);
+    return pages;
+  }, [page, totalPages]);
+
+  const renderBody = () => {
+    if (isLoading) {
+      return (
+        <tr>
+          <td colSpan={columns.length} className={`px-5 py-10 text-center text-sm ${dark ? "text-neutral-600" : "text-neutral-400"}`}>
+            Chargement…
+          </td>
+        </tr>
+      );
+    }
+    if (isError) {
+      return (
+        <tr>
+          <td colSpan={columns.length} className="px-5 py-10 text-center text-sm text-red-400">
+            Erreur lors du chargement.
+          </td>
+        </tr>
+      );
+    }
+    if (filtered.length === 0) {
+      return (
+        <tr>
+          <td colSpan={columns.length} className={`px-5 py-10 text-center text-sm ${dark ? "text-neutral-600" : "text-neutral-400"}`}>
+            Aucun résultat trouvé.
+          </td>
+        </tr>
+      );
+    }
+    return filtered.map((row, i) => (
+      <motion.tr
+        key={row.id}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: i * 0.03 }}
+        className={`border-t transition-colors ${
+          dark
+            ? "border-neutral-800/60 hover:bg-neutral-800/40"
+            : "border-amber-50 hover:bg-amber-50/50"
+        }`}
+      >
+        {columns.map((col) => (
+          <td
+            key={String(col.key)}
+            className={`px-5 py-3.5 text-${col.align ?? "left"} ${
+              dark ? "text-neutral-300" : "text-neutral-600"
+            }`}
+          >
+            {col.render
+              ? col.render(row)
+              : String((row as Record<string, unknown>)[String(col.key)] ?? "—")}
+          </td>
+        ))}
+      </motion.tr>
+    ));
+  };
+
+  const btnBase = `flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium transition-colors`;
 
   return (
     <motion.div
@@ -56,11 +143,9 @@ export default function DataTable<T extends { id: string | number }>({
       }`}
     >
       {/* Header */}
-      <div
-        className={`flex flex-wrap items-center justify-between gap-4 border-b px-5 py-4 ${
-          dark ? "border-neutral-800" : "border-amber-100"
-        }`}
-      >
+      <div className={`flex flex-wrap items-center justify-between gap-4 border-b px-5 py-4 ${
+        dark ? "border-neutral-800" : "border-amber-100"
+      }`}>
         <div>
           <h3 className="text-sm font-semibold">{title}</h3>
           {subtitle && (
@@ -69,7 +154,6 @@ export default function DataTable<T extends { id: string | number }>({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Search */}
           <div className="relative">
             <Search
               size={14}
@@ -88,7 +172,6 @@ export default function DataTable<T extends { id: string | number }>({
             />
           </div>
 
-          {/* Add button */}
           {onAdd && (
             <button
               onClick={onAdd}
@@ -116,55 +199,76 @@ export default function DataTable<T extends { id: string | number }>({
               ))}
             </tr>
           </thead>
-          <tbody>
-            {filtered.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className={`px-5 py-10 text-center text-sm ${dark ? "text-neutral-600" : "text-neutral-400"}`}
-                >
-                  Aucun résultat trouvé.
-                </td>
-              </tr>
-            ) : (
-              filtered.map((row, i) => (
-                <motion.tr
-                  key={row.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: i * 0.04 }}
-                  className={`border-t transition-colors ${
-                    dark
-                      ? "border-neutral-800/60 hover:bg-neutral-800/40"
-                      : "border-amber-50 hover:bg-amber-50/50"
-                  }`}
-                >
-                  {columns.map((col) => (
-                    <td
-                      key={String(col.key)}
-                      className={`px-5 py-3.5 text-${col.align ?? "left"} ${
-                        dark ? "text-neutral-300" : "text-neutral-600"
-                      }`}
-                    >
-                      {col.render
-                        ? col.render(row)
-                        : String((row as Record<string, unknown>)[String(col.key)] ?? "—")}
-                    </td>
-                  ))}
-                </motion.tr>
-              ))
-            )}
-          </tbody>
+          <tbody>{renderBody()}</tbody>
         </table>
       </div>
 
-      {/* Footer count */}
-      <div
-        className={`border-t px-5 py-3 text-xs ${
-          dark ? "border-neutral-800 text-neutral-600" : "border-amber-50 text-neutral-400"
-        }`}
-      >
-        {filtered.length} résultat{filtered.length !== 1 ? "s" : ""}
+      {/* Footer — pagination */}
+      <div className={`flex items-center justify-between border-t px-5 py-3 ${
+        dark ? "border-neutral-800" : "border-amber-50"
+      }`}>
+        <span className={`text-xs ${dark ? "text-neutral-600" : "text-neutral-400"}`}>
+          {isLoading ? "…" : `Page ${page} sur ${totalPages}`}
+        </span>
+
+        {totalPages > 1 && onPageChange && (
+          <div className="flex items-center gap-1">
+            {/* Prev */}
+            <button
+              onClick={() => onPageChange(page - 1)}
+              disabled={page === 1 || isLoading}
+              className={`${btnBase} ${
+                dark
+                  ? "text-neutral-400 hover:bg-neutral-800 disabled:opacity-30"
+                  : "text-neutral-400 hover:bg-neutral-100 disabled:opacity-30"
+              }`}
+            >
+              <ChevronLeft size={14} />
+            </button>
+
+            {/* Page numbers */}
+            {pageNumbers.map((p, i) =>
+              p === "..." ? (
+                <span
+                  key={`ellipsis-${i}`}
+                  className={`flex h-8 w-6 items-center justify-center text-xs ${
+                    dark ? "text-neutral-600" : "text-neutral-400"
+                  }`}
+                >
+                  …
+                </span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => onPageChange(p as number)}
+                  disabled={isLoading}
+                  className={`${btnBase} ${
+                    p === page
+                      ? "bg-[#FBAE17] text-black"
+                      : dark
+                      ? "text-neutral-400 hover:bg-neutral-800"
+                      : "text-neutral-500 hover:bg-neutral-100"
+                  }`}
+                >
+                  {p}
+                </button>
+              )
+            )}
+
+            {/* Next */}
+            <button
+              onClick={() => onPageChange(page + 1)}
+              disabled={page === totalPages || isLoading}
+              className={`${btnBase} ${
+                dark
+                  ? "text-neutral-400 hover:bg-neutral-800 disabled:opacity-30"
+                  : "text-neutral-400 hover:bg-neutral-100 disabled:opacity-30"
+              }`}
+            >
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   );

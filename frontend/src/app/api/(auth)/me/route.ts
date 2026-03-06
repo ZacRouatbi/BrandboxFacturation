@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+const API = process.env.NEST_BASEURL ?? "http://localhost:3000";
 
 // Proxies GET /auth/me to NestJS server-side.
 // The browser never calls NestJS directly — no CORS issue.

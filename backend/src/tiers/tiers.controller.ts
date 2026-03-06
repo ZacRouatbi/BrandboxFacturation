@@ -6,8 +6,12 @@ import {
   Patch,
   Delete,
   Param,
+  Query as Queryparam,
 } from '@nestjs/common';
+
 import { TierService } from './tiers.service';
+import { TierRole } from '@prisma/client';
+
 
 @Controller('tier')
 export class TierController {
@@ -17,11 +21,19 @@ export class TierController {
   create(@Body() dto: any) {
     return this.tierService.create(dto);
   }
-
-  @Get()
-  findAll() {
-    return this.tierService.findAll();
-  }
+  
+@Get()
+findAll(
+  @Queryparam('page')  page:  string,
+  @Queryparam('limit') limit: string,
+  @Queryparam('role')  role:  TierRole,
+) {
+  return this.tierService.findAll(
+    page  ? parseInt(page)  : 1,
+    limit ? parseInt(limit) : 10,
+    role  ?? undefined,
+  );
+}
 
   @Get(':id')
   findOne(@Param('id') id: string) {

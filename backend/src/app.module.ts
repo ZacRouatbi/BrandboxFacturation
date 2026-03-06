@@ -6,8 +6,7 @@ import { DocumentModule } from './document/document.module'
 import { PrismaModule } from './prisma/prisma.module'
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core'
+import {  ThrottlerModule } from '@nestjs/throttler';
 import { AppService } from './app.service'
 
 @Module({
@@ -29,11 +28,8 @@ import { AppService } from './app.service'
   ],
   controllers: [AppController],
   providers: [
-    AppService, // 👈 ADD THIS
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    AppService,
+
   ],
  
 })

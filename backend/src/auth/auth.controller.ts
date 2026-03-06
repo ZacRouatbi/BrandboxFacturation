@@ -10,8 +10,8 @@ import {
 import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt.guard';
-import { Throttle } from '@nestjs/throttler';
-
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+@UseGuards(ThrottlerGuard)
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}

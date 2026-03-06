@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, TierRole } from '@prisma/client';
 
@@ -67,31 +67,43 @@ export class TierService {
 
       const formattedCounter = String(counter).padStart(3, '0');
       const formattedMonth = String(month).padStart(2, '0');
-
-      return `${prefix}-${formattedMonth}-${year}-${formattedCounter}`;
+      const shortYear = String(year).slice(-2);
+      return `${prefix}-${formattedMonth}-${shortYear}-${formattedCounter}`;
     });
   }
 // Crée un nouveau tier avec un ID généré automatiquement
-  async create(data: {
-    name: string;
-    email?: string;
-    phone?: string;
-    address?: string;
-    role: TierRole;
-  }) {
-    const id = await this.generateTierId(data.role);
-
-    return this.prisma.tier.create({
-      data: {
-        id,
-        ...data,
-      },
+async create(data: {
+  name: string;
+  mf?: string;
+  phone?: string;
+  address?: string;
+  role: TierRole;
+}) {
+  // Check for duplicate M/F only if mf is provided
+  if (data.mf) {
+    const existing = await this.prisma.tier.findFirst({
+      where: { mf: data.mf },
     });
+    if (existing) {
+      throw new ConflictException(`Un client avec ce M/F existe déjà.`);
+    }
   }
-// Récupère tous les tiers
-  findAll() {
-    return this.prisma.tier.findMany();
-  }
+
+  const id = await this.generateTierId(data.role);
+  return this.prisma.tier.create({ data: { id, ...data } });
+}
+  // Récupère une liste paginée de tiers, avec un filtrage optionnel par rôle
+async findAll(page: number = 1, limit: number = 10, role?: TierRole) {
+  const where = role ? { role } : {};
+  const skip  = (page - 1) * limit;
+
+  const [data, total] = await Promise.all([
+    this.prisma.tier.findMany({ where, skip, take: limit, orderBy: { createdAt: 'desc' } }),
+    this.prisma.tier.count({ where }),
+  ]);
+
+  return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+}
 // Récupère un tier spécifique par ID
   findOne(id: string) {
     return this.prisma.tier.findUnique({
@@ -105,10 +117,13 @@ update(id: string, data: Prisma.TierUpdateInput) {
     data,
   });
 }
-// Supprime un tier par ID
-  remove(id: string) {
-    return this.prisma.tier.delete({
-      where: { id },
-    });
+async remove(id: string) {
+  const existing = await this.prisma.tier.findUnique({ where: { id } });
+
+  if (!existing) {
+    throw new NotFoundException(`Tier with id ${id} not found`);
   }
+
+  return this.prisma.tier.delete({ where: { id } });
+}
 }

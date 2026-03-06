@@ -4,7 +4,7 @@ import { Document } from './document.types'
 export interface Tier {
   id: string
   name: string
-  email?: string
+  mf?: string
   phone?: string
   address?: string
   role: TierRole
@@ -14,12 +14,18 @@ export interface Tier {
 }
 
 export interface CreateTierDto {
-  id: string
   name: string
-  email?: string
+  mf?: string
   phone?: string
   address?: string
   role: TierRole
+}
+export interface PaginatedTiers {
+  data:       Tier[];
+  total:      number;
+  page:       number;
+  limit:      number;
+  totalPages: number;
 }
 
 export type UpdateTierDto = Partial<CreateTierDto>
