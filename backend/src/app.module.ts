@@ -8,6 +8,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import {  ThrottlerModule } from '@nestjs/throttler';
 import { AppService } from './app.service'
+import { MailerModule } from './mailer/mailer.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { AppService } from './app.service'
     PrismaModule,
     UserModule,
     AuthModule,
+    MailerModule,
   ],
   controllers: [AppController],
   providers: [

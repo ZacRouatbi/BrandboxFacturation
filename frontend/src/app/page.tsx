@@ -156,7 +156,7 @@ export default function Page() {
           </div>
 
           <div className="flex items-center justify-end text-sm">
-            <a href="#" className="font-medium text-[#FBAE17] hover:underline">
+            <a href="/forgot-password" className="font-medium text-[#FBAE17] hover:underline">
               Mot de passe oublié ?
             </a>
           </div>

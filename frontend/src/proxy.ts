@@ -41,5 +41,6 @@ export const config = {
   // Run on everything except Next.js internals and static public files
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|logo-light\\.png|logo-dark\\.png).*)",
+    
   ],
 };

@@ -10,11 +10,12 @@ import { AuthUser, LoginPayload, LoginResponse } from "@/types/auth.types";
 // sliding 15min expiry keeps resetting on every call.
 
 export function useMe() {
-  return useQuery<AuthUser>({
+  return useQuery<AuthUser | null>({
     queryKey:  ["auth", "me"],
     queryFn:   async () => {
       const res = await fetch("/api/me");
-      if (!res.ok) throw new Error("Non autorisé.");
+      if (res.status === 401) return null;
+      if (!res.ok) throw new Error("Erreur serveur.");
       return res.json() as Promise<AuthUser>;
     },
     retry:     false,
@@ -64,6 +65,36 @@ export function useLogout() {
     onSuccess: () => {
       queryClient.clear();
       router.push("/");
+    },
+  });
+}
+// ── Forgot password ─────────────────────────────────────────────────────────────
+// Posts to /api/forgot-password — Next.js proxy that forwards to NestJS POST /auth/forgot-password
+export function useForgotPassword() {
+  return useMutation<{ message: string }, Error, { username: string }>({
+    mutationFn: async ({ username }) => {
+      const res  = await fetch("/api/forgot-password", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ username }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message ?? "Erreur serveur.");
+      return data;
+    },
+  });
+}
+export function useResetPassword() {
+  return useMutation<{ newPassword: string }, Error, { token: string }>({
+    mutationFn: async ({ token }) => {
+      const res  = await fetch("/api/reset-password", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ token }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message ?? "Erreur serveur.");
+      return data;
     },
   });
 }
