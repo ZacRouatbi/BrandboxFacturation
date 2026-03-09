@@ -95,4 +95,22 @@ export class AuthService {
 
     return newPassword;
   }
+async updateAccount(
+  username: string,
+  currentPassword: string,
+  newUsername?: string,
+  newPassword?: string,
+): Promise<void> {
+  const user = await this.prisma.user.findUnique({ where: { username } });
+  if (!user) throw new UnauthorizedException('Utilisateur introuvable.');
+
+  const valid = await bcrypt.compare(currentPassword, user.password);
+  if (!valid) throw new UnauthorizedException('Mot de passe actuel incorrect.');
+
+  const data: any = {};
+  if (newUsername) data.username = newUsername;
+  if (newPassword) data.password = await bcrypt.hash(newPassword, 10);
+
+  await this.prisma.user.update({ where: { id: user.id }, data });
+}
 }

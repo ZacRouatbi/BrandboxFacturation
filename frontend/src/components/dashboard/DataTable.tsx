@@ -23,7 +23,6 @@ interface DataTableProps<T> {
   searchKeys?: (keyof T)[];
   isLoading?: boolean;
   isError?: boolean;
-  // Server-side pagination props
   page?:       number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
@@ -47,7 +46,6 @@ export default function DataTable<T extends { id: string | number }>({
   const { dark } = useTheme();
   const [query, setQuery] = useState("");
 
-  // Client-side search filters the current page's data only
   const filtered = useMemo(() =>
     query.trim()
       ? data.filter((row) =>
@@ -58,7 +56,6 @@ export default function DataTable<T extends { id: string | number }>({
       : data,
   [query, data, searchKeys]);
 
-  // Generate page numbers to show — always show first, last, current ±1
   const pageNumbers = useMemo(() => {
     if (totalPages <= 7) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -138,8 +135,8 @@ export default function DataTable<T extends { id: string | number }>({
       transition={{ duration: 0.4 }}
       className={`rounded-2xl border ${
         dark
-          ? "border-neutral-800 bg-neutral-900/70 backdrop-blur-xl"
-          : "border-amber-100 bg-white/70 backdrop-blur-xl shadow-sm"
+          ? "border-neutral-800 bg-neutral-900/70"
+          : "border-amber-100 bg-white/70 shadow-sm"
       }`}
     >
       {/* Header */}
@@ -213,7 +210,6 @@ export default function DataTable<T extends { id: string | number }>({
 
         {totalPages > 1 && onPageChange && (
           <div className="flex items-center gap-1">
-            {/* Prev */}
             <button
               onClick={() => onPageChange(page - 1)}
               disabled={page === 1 || isLoading}
@@ -226,7 +222,6 @@ export default function DataTable<T extends { id: string | number }>({
               <ChevronLeft size={14} />
             </button>
 
-            {/* Page numbers */}
             {pageNumbers.map((p, i) =>
               p === "..." ? (
                 <span
@@ -255,7 +250,6 @@ export default function DataTable<T extends { id: string | number }>({
               )
             )}
 
-            {/* Next */}
             <button
               onClick={() => onPageChange(page + 1)}
               disabled={page === totalPages || isLoading}

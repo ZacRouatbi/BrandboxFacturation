@@ -8,6 +8,7 @@ import {
   Req,
   HttpCode,
   HttpStatus,
+  Patch,
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
@@ -71,4 +72,20 @@ export class AuthController {
     const newPassword = await this.authService.resetPassword(dto.token);
     return { newPassword };
   }
+
+@Patch('update-account')
+async updateAccount(@Body() dto: {
+  username:        string;
+  currentPassword: string;
+  newUsername?:    string;
+  newPassword?:    string;
+}) {
+  await this.authService.updateAccount(
+    dto.username,
+    dto.currentPassword,
+    dto.newUsername,
+    dto.newPassword,
+  );
+  return { message: 'Compte mis à jour.' };
+}
 }

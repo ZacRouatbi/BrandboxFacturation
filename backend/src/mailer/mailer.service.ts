@@ -25,7 +25,6 @@ export class MailerService {
         subject: 'Réinitialisation de votre mot de passe — Brandbox',
         html:    resetPasswordTemplate(to, resetUrl),
       });
-      
     } catch (err) {
       console.error('Mailer error:', err);
       throw new InternalServerErrorException(
