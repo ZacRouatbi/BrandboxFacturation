@@ -1,206 +1,214 @@
 "use client";
 
-import { useState, FormEvent } from "react";
-import { Mail, Lock, Sun, Moon, Eye, EyeOff } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
-import AnimatedBackground from "@/components/AnimatedBackground";
-import { useLogin } from "@/hooks/useAuth";
+import { useTheme } from "@/providers/ThemeProvider";
+import Topbar from "@/components/dashboard/Topbar";
+import DashboardCard from "@/components/dashboard/DashboardCard";
+import { useDashboardStats } from "@/hooks/useDashboard";
+import {
+  Users, Truck, FileText, Receipt, TrendingUp, Clock,
+} from "lucide-react";
+import { motion } from "framer-motion";
 
-const FacebookIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" width={20} height={20}>
-    <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987H7.898V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
-  </svg>
-);
-const InstagramIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" width={20} height={20}>
-    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.975.975 1.246 2.242 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.334 2.633-1.308 3.608-.975.975-2.242 1.246-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.334-3.608-1.308-.975-.975-1.246-2.242-1.308-3.608C2.175 15.584 2.163 15.204 2.163 12s.012-3.584.07-4.85c.062-1.366.334-2.633 1.308-3.608C4.516 2.497 5.783 2.226 7.149 2.163 8.415 2.105 8.795 2.163 12 2.163zm0-2.163C8.741 0 8.332.014 7.052.072 5.197.157 3.355.673 2.014 2.014.673 3.355.157 5.197.072 7.052.014 8.332 0 8.741 0 12c0 3.259.014 3.668.072 4.948.085 1.855.601 3.697 1.942 5.038 1.341 1.341 3.183 1.857 5.038 1.942C8.332 23.986 8.741 24 12 24s3.668-.014 4.948-.072c1.855-.085 3.697-.601 5.038-1.942 1.341-1.341 1.857-3.183 1.942-5.038.058-1.28.072-1.689.072-4.948s-.014-3.668-.072-4.948c-.085-1.855-.601-3.697-1.942-5.038C20.645.673 18.803.157 16.948.072 15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" />
-  </svg>
-);
-const BehanceIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" width={20} height={20}>
-    <path d="M22 7h-7V5h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14H15.97c.13 3.211 3.483 3.312 4.588 2.029H23.726zm-7.686-3h4.965c-.105-1.547-1.136-2.219-2.477-2.219-1.466 0-2.277.768-2.488 2.219zm-9.574 6.988H0V5.021h6.953c5.476.081 5.58 5.444 2.72 6.906 3.461 1.26 3.577 8.061-3.207 8.061zM3 11h3.584c2.508 0 2.906-3-.312-3H3v3zm3.391 3H3v3.016h3.341c3.055 0 2.868-3.016.05-3.016z" />
-  </svg>
-);
-const LinkedInIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" width={20} height={20}>
-    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-  </svg>
-);
+// ── Status helpers ──────────────────────────────────────────────
+function statusLabel(type: string, devisStatus: string | null, factureStatus: string | null) {
+  if (type === "FACTURE") {
+    return factureStatus === "PAID"
+      ? { label: "PAYÉE",     color: "text-emerald-500" }
+      : { label: "NON PAYÉE", color: "text-red-400"     };
+  }
+  if (devisStatus === "ACCEPTED")  return { label: "ACCEPTÉ",    color: "text-emerald-500" };
+  if (devisStatus === "CANCELLED") return { label: "ANNULÉ",     color: "text-red-400"     };
+  return                                  { label: "EN ATTENTE", color: "text-amber-500"   };
+}
 
-const socialLinks = [
-  { icon: <FacebookIcon />, href: "https://www.facebook.com/profile.php?id=61572638457632", label: "Facebook"  },
-  { icon: <InstagramIcon />, href: "https://www.instagram.com/brandbox_agency/", label: "Instagram" },
-  { icon: <BehanceIcon />,  href: "https://www.behance.net/brandboxtunisia", label: "Behance"   },
-  { icon: <LinkedInIcon />, href: "https://www.linkedin.com/company/brandbox-creative-agency/", label: "LinkedIn"  },
-];
+// ── Skeleton loader ─────────────────────────────────────────────
+function Skeleton({ className }: { className?: string }) {
+  return <div className={`animate-pulse rounded-lg bg-neutral-200 dark:bg-neutral-800 ${className}`} />;
+}
 
-export default function Page() {
-  const [dark, setDark]               = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
-  const [username, setUsername]       = useState("");
-  const [password, setPassword]       = useState("");
+// ── Trend badge ─────────────────────────────────────────────────
+function Trend({ value }: { value: number | null }) {
+  if (value === null) return null;
+  const positive = value >= 0;
+  return (
+    <span className={`text-xs font-medium ${positive ? "text-emerald-500" : "text-red-400"}`}>
+      {positive ? "▲" : "▼"} {Math.abs(value)}% vs mois dernier
+    </span>
+  );
+}
 
-  const { mutate: login, isPending, error } = useLogin();
+export default function DashboardPage() {
+  const { dark } = useTheme();
+  const { data, isLoading } = useDashboardStats();
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    login({ username, password });
-  };
+  const border  = dark ? "border-neutral-800"    : "border-amber-100";
+  const subtext = dark ? "text-neutral-400"      : "text-neutral-500";
+  const rowHover= dark ? "border-neutral-800/60 hover:bg-neutral-800/40" : "border-amber-50 hover:bg-amber-50/50";
+  const headTxt = dark ? "text-neutral-600"      : "text-neutral-400";
+  const cellTxt = dark ? "text-neutral-300"      : "text-neutral-600";
 
   return (
-    <main
-      className={`relative flex min-h-screen items-center justify-center overflow-hidden px-4 transition-colors duration-700 ${
-        dark ? "bg-[#090800] text-white" : "bg-[#fffef8] text-black"
-      }`}
-    >
-      <AnimatedBackground dark={dark} />
+    <div className="flex flex-1 flex-col overflow-hidden">
+      <Topbar title="Tableau de bord" />
 
-      {/* Theme Toggle */}
-      <button
-        onClick={() => setDark(!dark)}
-        className={`absolute right-6 top-6 z-20 rounded-full border p-2 backdrop-blur transition hover:scale-110 ${
-          dark ? "border-neutral-700 bg-neutral-900/50" : "border-amber-200 bg-white/60"
-        }`}
-      >
-        {dark ? <Sun size={18} /> : <Moon size={18} />}
-      </button>
+      <main className="flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-6">
 
-      {/* Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className={`relative z-10 w-full max-w-md rounded-2xl border p-8 shadow-2xl backdrop-blur-2xl ${
-          dark
-            ? "border-neutral-800/60 bg-neutral-900/65 shadow-black/60"
-            : "border-amber-100 bg-white/65 shadow-amber-100/40"
-        }`}
-      >
-        {/* Logo */}
-        <div className="mb-8 flex h-[50px] items-center justify-center">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={dark ? "darkLogo" : "lightLogo"}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-            >
-              <Image
-                src={dark ? "/logo-light.png" : "/logo-dark.png"}
-                alt="Brandbox Logo"
-                width={160}
-                height={50}
-                priority
+        {/* Greeting */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mb-5 sm:mb-6"
+        >
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Bonjour 👋</h1>
+          <p className={`mt-1 text-xs sm:text-sm ${subtext}`}>
+            Voici un aperçu de votre activité aujourd&apos;hui.
+          </p>
+        </motion.div>
+
+        {/* ── Stat cards row 1 ── */}
+        <div className="mb-4 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-28 sm:h-32" />
+            ))
+          ) : (
+            <>
+              <DashboardCard
+                index={0} accent
+                title="Chiffre d'affaires"
+                value={`${(data?.ca ?? 0).toLocaleString("fr-FR", { minimumFractionDigits: 3 })} TND`}
+                subtitle="Ce mois-ci"
+                icon={TrendingUp}
+                trend={data?.caTrend != null ? { value: data.caTrend, label: "vs mois dernier" } : undefined}
               />
-            </motion.div>
-          </AnimatePresence>
+              <DashboardCard
+                index={1}
+                title="Clients"
+                value={String(data?.totalClients ?? 0)}
+                subtitle="Total actifs"
+                icon={Users}
+              />
+              <DashboardCard
+                index={2}
+                title="Fournisseurs"
+                value={String(data?.totalFournisseurs ?? 0)}
+                subtitle="Total actifs"
+                icon={Truck}
+              />
+              <DashboardCard
+                index={3}
+                title="Devis en attente"
+                value={String(data?.devisEnAttente ?? 0)}
+                subtitle="À traiter"
+                icon={FileText}
+              />
+            </>
+          )}
         </div>
 
-        <h1 className="mb-8 text-center text-3xl font-bold">Bienvenue !</h1>
-
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          {/* Error message */}
-          <AnimatePresence>
-            {error && (
-              <motion.p
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-center text-sm text-red-400"
-              >
-                {error.message}
-              </motion.p>
-            )}
-          </AnimatePresence>
-
-          {/* Username */}
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 opacity-60" size={20} />
-            <input
-              type="text"
-              placeholder="Nom d'utilisateur"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              disabled={isPending}
-              className={`w-full rounded-xl border bg-transparent py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-[#FBAE17] disabled:opacity-50 ${
-                dark ? "border-neutral-700" : "border-neutral-300"
-              }`}
-            />
-          </div>
-
-          {/* Password */}
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 opacity-60" size={20} />
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Mot de passe"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isPending}
-              className={`w-full rounded-xl border bg-transparent py-3 pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-[#FBAE17] disabled:opacity-50 ${
-                dark ? "border-neutral-700" : "border-neutral-300"
-              }`}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 opacity-50 transition hover:opacity-100"
-              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-
-          <div className="flex items-center justify-end text-sm">
-            <a href="/forgot-password" className="font-medium text-[#FBAE17] hover:underline">
-              Mot de passe oublié ?
-            </a>
-          </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={isPending}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FBAE17] py-3 font-semibold text-black transition hover:scale-[1.02] hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {isPending ? (
-              <>
-                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                Connexion…
-              </>
-            ) : (
-              "Se connecter"
-            )}
-          </button>
-        </form>
-
-        {/* Social */}
-        <div className="mt-6 flex items-center justify-center gap-4">
-          {socialLinks.map(({ icon, href, label }) => (
-            <a
-              key={label}
-              href={href}
-              aria-label={label}
-              className={`rounded-full border p-2.5 transition-all duration-200 hover:scale-110 hover:border-[#FBAE17] hover:text-[#FBAE17] ${
-                dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500"
-              }`}
-            >
-              {icon}
-            </a>
-          ))}
+        {/* ── Stat cards row 2 ── */}
+        <div className="mb-5 grid grid-cols-2 gap-3 sm:mb-8 sm:gap-4">
+          {isLoading ? (
+            Array.from({ length: 2 }).map((_, i) => (
+              <Skeleton key={i} className="h-28 sm:h-32" />
+            ))
+          ) : (
+            <>
+              <DashboardCard
+                index={4}
+                title="Factures non payées"
+                value={String(data?.facturesNonPayees ?? 0)}
+                subtitle="Relances requises"
+                icon={Receipt}
+              />
+              <DashboardCard
+                index={5}
+                title="Devis acceptés"
+                value={String(data?.devisAcceptesThisMonth ?? 0)}
+                subtitle="Ce mois-ci"
+                icon={FileText}
+                trend={data?.devisTrend != null ? { value: data.devisTrend, label: "vs mois dernier" } : undefined}
+              />
+            </>
+          )}
         </div>
 
-        <p className="mt-6 text-center text-sm opacity-50">
-          Brandbox © {new Date().getFullYear()}
-        </p>
-      </motion.div>
-    </main>
+        {/* ── Recent activity ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.35 }}
+          className={`rounded-2xl border ${
+            dark
+              ? "border-neutral-800 bg-neutral-900/70 backdrop-blur-xl"
+              : "border-amber-100 bg-white/70 backdrop-blur-xl shadow-sm"
+          }`}
+        >
+          {/* Header */}
+          <div className={`flex items-center justify-between border-b px-4 py-3 sm:px-5 sm:py-4 ${border}`}>
+            <div className="flex items-center gap-2">
+              <Clock size={15} className="text-[#FBAE17]" />
+              <span className="text-xs font-semibold sm:text-sm">Activité récente</span>
+            </div>
+            <span className={`text-xs ${subtext}`}>8 dernières opérations</span>
+          </div>
+
+          {/* Table — scrollable on small screens */}
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[520px] text-sm">
+              <thead>
+                <tr className={`text-[10px] uppercase tracking-widest sm:text-xs ${headTxt}`}>
+                  <th className="px-4 py-3 text-left font-medium sm:px-5">Référence</th>
+                  <th className="px-4 py-3 text-left font-medium sm:px-5">Type</th>
+                  <th className="px-4 py-3 text-left font-medium sm:px-5">Client</th>
+                  <th className="px-4 py-3 text-right font-medium sm:px-5">Montant</th>
+                  <th className="px-4 py-3 text-right font-medium sm:px-5">Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading
+                  ? Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i} className={`border-t ${border}`}>
+                        {Array.from({ length: 5 }).map((_, j) => (
+                          <td key={j} className="px-4 py-3 sm:px-5">
+                            <Skeleton className="h-3 w-full" />
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  : (data?.recentActivity ?? []).map((item, i) => {
+                      const { label, color } = statusLabel(item.type, item.devisStatus, item.factureStatus);
+                      return (
+                        <motion.tr
+                          key={item.id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.4 + i * 0.05 }}
+                          className={`border-t transition-colors ${rowHover}`}
+                        >
+                          <td className="px-4 py-3 font-mono text-xs text-[#FBAE17] sm:px-5">{item.id}</td>
+                          <td className={`px-4 py-3 text-xs sm:px-5 sm:text-sm ${cellTxt}`}>
+                            {item.type === "FACTURE" ? "Facture" : "Devis"}
+                          </td>
+                          <td className={`px-4 py-3 text-xs sm:px-5 sm:text-sm ${cellTxt}`}>
+                            {item.tier?.name ?? "—"}
+                          </td>
+                          <td className={`px-4 py-3 text-right text-xs font-medium sm:px-5 sm:text-sm ${dark ? "text-white" : "text-black"}`}>
+                            {Number(item.totalTTC).toLocaleString("fr-FR", { minimumFractionDigits: 3 })} {item.currency}
+                          </td>
+                          <td className={`px-4 py-3 text-right text-[10px] font-semibold sm:px-5 sm:text-xs ${color}`}>
+                            {label}
+                          </td>
+                        </motion.tr>
+                      );
+                    })}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
+
+      </main>
+    </div>
   );
 }

@@ -7,6 +7,7 @@ import {
   DevisStatus,
   FactureStatus,
   Currency,
+  TierRole,
 } from '@prisma/client';
 
 @Injectable()
@@ -302,4 +303,74 @@ export class DocumentService {
     if (!existing) throw new NotFoundException('Document not found');
     return this.prisma.document.delete({ where: { id } });
   }
+  // ── Dashboard stats ─────────────────────────────────────────────
+  async getStats() {
+    const now       = new Date();
+    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+
+    const [
+      totalClients,
+      totalFournisseurs,
+      devisEnAttente,
+      facturesNonPayees,
+      // This month
+      facturesThisMonth,
+      devisAcceptesThisMonth,
+      // Last month
+      facturesLastMonth,
+      devisAcceptesLastMonth,
+      // Recent activity
+      recentDocs,
+    ] = await this.prisma.$transaction([
+      this.prisma.tier.count({ where: { role: { in: [TierRole.CLIENT, TierRole.BOTH] } } }),
+      this.prisma.tier.count({ where: { role: { in: [TierRole.FOURNISSEUR, TierRole.BOTH] } } }),
+      this.prisma.document.count({ where: { type: 'DEVIS', devisStatus: 'ON_HOLD' } }),
+      this.prisma.document.count({ where: { type: 'FACTURE', factureStatus: 'NOT_PAID' } }),
+
+      this.prisma.document.findMany({
+        where: { type: 'FACTURE', date: { gte: thisMonth } },
+        select: { totalTTC: true, factureStatus: true },
+      }),
+      this.prisma.document.count({
+        where: { type: 'DEVIS', devisStatus: 'ACCEPTED', date: { gte: thisMonth } },
+      }),
+
+      this.prisma.document.findMany({
+        where: { type: 'FACTURE', date: { gte: lastMonth, lte: lastMonthEnd } },
+        select: { totalTTC: true },
+      }),
+      this.prisma.document.count({
+        where: { type: 'DEVIS', devisStatus: 'ACCEPTED', date: { gte: lastMonth, lte: lastMonthEnd } },
+      }),
+
+      this.prisma.document.findMany({
+        take:    8,
+        orderBy: { date: 'desc' },
+        include: { tier: true },
+      }),
+    ]);
+
+    const caThisMonth  = facturesThisMonth.reduce((s, d) => s + Number(d.totalTTC), 0);
+    const caLastMonth  = facturesLastMonth.reduce((s, d) => s + Number(d.totalTTC), 0);
+    const caTrend      = caLastMonth === 0 ? null : Math.round(((caThisMonth - caLastMonth) / caLastMonth) * 100);
+
+    const devisTrend   = devisAcceptesLastMonth === 0 ? null
+      : Math.round(((devisAcceptesThisMonth - devisAcceptesLastMonth) / devisAcceptesLastMonth) * 100);
+
+    return {
+      ca:               caThisMonth,
+      totalClients,
+      totalFournisseurs,
+      devisEnAttente,
+      facturesNonPayees,
+      devisAcceptesThisMonth,
+      caTrend,
+      devisTrend,
+      recentActivity:   recentDocs,
+    };
+  }
 }
+
+  

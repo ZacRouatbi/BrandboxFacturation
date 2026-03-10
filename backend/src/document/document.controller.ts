@@ -30,7 +30,7 @@ export class DocumentController {
       currency:     Currency;
       tva:          string | number;
       hasTva:       boolean;
-      dueDate?:       string | Date ;
+      dueDate?:     string | Date | null;
       designations: {
         description: string;
         quantity:    number;
@@ -42,7 +42,13 @@ export class DocumentController {
     return this.documentService.create(dto);
   }
 
-  // GET /document?type=DEVIS&page=1&limit=10&dateFrom=...&dateTo=...&dueDateFrom=...&dueDateTo=...
+  // GET /document/stats  ← must be before /:id
+  @Get('stats')
+  getStats() {
+    return this.documentService.getStats();
+  }
+
+  // GET /document?type=DEVIS&page=1&limit=10&...
   @Get()
   findAll(
     @Query('page')         page?:         string,
@@ -76,7 +82,7 @@ export class DocumentController {
     @Param('id') id: string,
     @Body()
     dto: {
-      dueDate?:       Date;
+      dueDate?:       string | Date | null;
       tva?:           string | number;
       currency?:      Currency;
       devisStatus?:   DevisStatus;
