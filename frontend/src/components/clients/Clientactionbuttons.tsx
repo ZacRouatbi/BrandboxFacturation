@@ -45,7 +45,7 @@ function ConfirmDialog({
         animate={{ opacity: 1, scale: 1,    y: 0 }}
         exit={{ opacity: 0,   scale: 0.95, y: 8 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        className={`fixed left-[calc(30%)] top-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2
+        className={`fixed inset-0 m-auto z-[60] h-fit w-full max-w-sm
           rounded-2xl border p-6 shadow-2xl text-left ${
           dark
             ? "border-neutral-800 bg-neutral-900"

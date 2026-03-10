@@ -1,52 +1,107 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { useState, useMemo, useEffect } from "react";
+import DateInput from "@/components/dashboard/Dateinput";
+import { useTheme } from "@/providers/ThemeProvider";
 import Topbar from "@/components/dashboard/Topbar";
 import DataTable from "@/components/dashboard/DataTable";
-import { Document } from "@/types/document.types";
+import { getFactureColumns } from "@/components/facture/Facturecolumns";
+import { useFactures, FactureFilters } from "@/hooks/useFacture";
 
-const mockFactures: Document[] = [
-  { id: "FA-2025-001", type: "FACTURE", factureStatus: "PAID",     date: "2025-02-10", dueDate: "2025-03-10", totalHT: 1228.813, totalTTC: 1450, currency: "TND", tva: 18, tierId: "CL-001", createdAt: "2025-02-10", updatedAt: "2025-02-10" },
-  { id: "FA-2025-002", type: "FACTURE", factureStatus: "NOT_PAID", date: "2025-02-18", dueDate: "2025-03-18", totalHT: 661.017,  totalTTC: 780.5,currency: "TND", tva: 18, tierId: "CL-003", createdAt: "2025-02-18", updatedAt: "2025-02-18" },
-  { id: "FA-2025-003", type: "FACTURE", factureStatus: "PAID",     date: "2025-03-01", dueDate: "2025-04-01", totalHT: 1779.661, totalTTC: 2100, currency: "TND", tva: 18, tierId: "CL-005", createdAt: "2025-03-01", updatedAt: "2025-03-01" },
-  { id: "FA-2025-004", type: "FACTURE", factureStatus: "NOT_PAID", date: "2025-03-05", dueDate: "2025-04-05", totalHT: 2711.864, totalTTC: 3200, currency: "TND", tva: 18, tierId: "CL-002", createdAt: "2025-03-05", updatedAt: "2025-03-05" },
-  { id: "FA-2025-005", type: "FACTURE", factureStatus: "PAID",     date: "2025-03-10", dueDate: "2025-04-10", totalHT: 4915.254, totalTTC: 5800, currency: "TND", tva: 18, tierId: "CL-004", createdAt: "2025-03-10", updatedAt: "2025-03-10" },
-];
+const PAGE_SIZE = 10;
 
-const statusConfig: Record<string, { label: string; className: string }> = {
-  PAID:     { label: "Payée",     className: "bg-emerald-500/10 text-emerald-500" },
-  NOT_PAID: { label: "Non payée", className: "bg-red-500/10 text-red-400"         },
-};
+export default function FacturesPage() {
+  const { dark } = useTheme();
 
-const columns = [
-  { key: "id",            label: "Référence", render: (r: Document) => <span className="font-mono text-xs text-[#FBAE17]">{r.id}</span> },
-  { key: "tierId",        label: "Client",    render: (r: Document) => <span className="font-medium">{r.tierId}</span> },
-  { key: "date",          label: "Date",      render: (r: Document) => new Date(r.date).toLocaleDateString("fr-FR") },
-  { key: "dueDate",       label: "Échéance",  render: (r: Document) => r.dueDate ? new Date(r.dueDate).toLocaleDateString("fr-FR") : "—" },
-  { key: "totalHT",       label: "Total HT",  align: "right" as const, render: (r: Document) => `${r.totalHT.toLocaleString("fr-FR")} ${r.currency}` },
-  { key: "totalTTC",      label: "Total TTC", align: "right" as const, render: (r: Document) => <span className="font-medium">{r.totalTTC.toLocaleString("fr-FR")} {r.currency}</span> },
-  {
-    key: "factureStatus", label: "Statut",    align: "right" as const,
-    render: (r: Document) => {
-      const s = statusConfig[r.factureStatus ?? ""];
-      return s ? <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${s.className}`}>{s.label}</span> : "—";
-    },
-  },
-];
+  const [page,    setPage]    = useState(1);
+  const [filters, setFilters] = useState<FactureFilters>({});
+  const [search,  setSearch]  = useState("");
 
-export default function FacturePage() {
+  const { data, isLoading, isError, isFetching } = useFactures(page, PAGE_SIZE, filters);
+
+  const allFactures = data?.data       ?? [];
+  const totalPages  = data?.totalPages ?? 1;
+  const total       = data?.total      ?? 0;
+
+  // Client-side search on current page by reference or client name
+  const filtered = useMemo(() => {
+    if (!search.trim()) return allFactures;
+    const q = search.toLowerCase();
+    return allFactures.filter(
+      (f) =>
+        f.id.toLowerCase().includes(q) ||
+        ((f as any).tier?.name ?? "").toLowerCase().includes(q),
+    );
+  }, [allFactures, search]);
+
+  const columns = useMemo(() => getFactureColumns(), []);
+
+  useEffect(() => {
+    if (!isLoading && !isFetching && page > totalPages && totalPages > 0) {
+      setTimeout(() => setPage(totalPages), 0);
+    }
+  }, [isLoading, isFetching, page, totalPages]);
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <Topbar title="Factures" />
-      <main className="flex-1 overflow-y-auto px-6 py-6">
+
+      <main className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+
+        {/* Date filter */}
+        <div className={`flex flex-wrap items-end gap-4 rounded-2xl border px-5 py-4 ${
+          dark ? "border-neutral-800 bg-neutral-900/70" : "border-amber-100 bg-white/70 shadow-sm"
+        }`}>
+          <div>
+            <p className={`mb-1.5 text-xs font-medium uppercase tracking-widest ${
+              dark ? "text-neutral-500" : "text-neutral-400"
+            }`}>Date de facturation</p>
+            <div className="flex items-center gap-2">
+              <DateInput
+                value={filters.dateFrom ?? ""}
+                onChange={(v) => { setFilters((f) => ({ ...f, dateFrom: v || undefined })); setPage(1); }}
+                className={`rounded-xl border px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#FBAE17] [color-scheme:${dark ? "dark" : "light"}] ${
+                  dark ? "border-neutral-700 bg-neutral-800 text-white" : "border-neutral-200 bg-white text-black"
+                }`}
+              />
+              <span className={`text-xs ${dark ? "text-neutral-600" : "text-neutral-400"}`}>→</span>
+              <DateInput
+                value={filters.dateTo ?? ""}
+                onChange={(v) => { setFilters((f) => ({ ...f, dateTo: v || undefined })); setPage(1); }}
+                className={`rounded-xl border px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#FBAE17] [color-scheme:${dark ? "dark" : "light"}] ${
+                  dark ? "border-neutral-700 bg-neutral-800 text-white" : "border-neutral-200 bg-white text-black"
+                }`}
+              />
+            </div>
+          </div>
+
+          {(filters.dateFrom || filters.dateTo) && (
+            <button
+              onClick={() => { setFilters({}); setPage(1); }}
+              className={`rounded-xl border px-3 py-2 text-xs font-medium transition hover:opacity-80 ${
+                dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500"
+              }`}
+            >
+              Effacer les filtres
+            </button>
+          )}
+        </div>
+
+        {/* Table — controlled search so nested tier.name works */}
         <DataTable
           title="Liste des factures"
-          subtitle={`${mockFactures.length} factures enregistrées`}
+          subtitle={`${total} facture${total !== 1 ? "s" : ""} enregistrée${total !== 1 ? "s" : ""}`}
           columns={columns}
-          data={mockFactures}
-          addLabel="Nouvelle facture"
-          onAdd={() => {}}
-          searchPlaceholder="Rechercher une facture..."
-          searchKeys={["id", "tierId"]}
+          data={filtered}
+          isLoading={isLoading}
+          isError={isError}
+          searchPlaceholder="Rechercher par référence ou client…"
+          searchValue={search}
+          onSearchChange={(v) => { setSearch(v); setPage(1); }}
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
         />
       </main>
     </div>

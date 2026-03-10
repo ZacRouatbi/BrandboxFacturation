@@ -27,7 +27,6 @@ function ConfirmDialog({
 
   return (
     <>
-      {/* Backdrop */}
       <motion.div
         key="backdrop"
         initial={{ opacity: 0 }}
@@ -38,33 +37,29 @@ function ConfirmDialog({
         className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
       />
 
-      {/* Dialog */}
       <motion.div
         key="dialog"
         initial={{ opacity: 0, scale: 0.95, y: 8 }}
         animate={{ opacity: 1, scale: 1,    y: 0 }}
         exit={{ opacity: 0,   scale: 0.95, y: 8 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        className={`fixed left-[calc(30%)] top-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2
+        className={`fixed inset-0 m-auto z-[60] h-fit w-full max-w-sm
           rounded-2xl border p-6 shadow-2xl text-left ${
           dark
             ? "border-neutral-800 bg-neutral-900"
             : "border-amber-100 bg-white"
         }`}
       >
-        {/* Icon */}
         <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-red-500/10">
           <AlertTriangle size={20} className="text-red-400" />
         </div>
 
-        {/* Text */}
         <h3 className="mb-1 text-sm font-semibold">Supprimer ce Fournisseur ?</h3>
         <p className={`text-xs ${dark ? "text-neutral-500" : "text-neutral-400"}`}>
           <span className="font-medium">{name}</span> sera supprimé définitivement.
           Cette action est irréversible.
         </p>
 
-        {/* Actions */}
         <div className="mt-5 flex gap-2">
           <button
             onClick={onCancel}

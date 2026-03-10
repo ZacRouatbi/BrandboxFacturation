@@ -23,6 +23,7 @@ export interface CreateDocumentDto {
   devisStatus?: DevisStatus
   factureStatus?: FactureStatus
   dueDate?: string
+  hasTva: boolean
   totalHT: number
   totalTTC: number
   currency: Currency

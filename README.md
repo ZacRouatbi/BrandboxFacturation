@@ -77,6 +77,39 @@ Examples:
 
 Counter resets every month per prefix.
 
+## Document ID Format
+
+### Devis
+```
+DEV-{MM}-{YYYY}-{NNN}
+```
+Counter resets every month.
+
+Examples:
+* `DEV-03-2026-001` — first devis of March 2026
+* `DEV-04-2026-001` — counter resets in April
+
+### Facture
+```
+FAC-{MM}-{YYYY}-{NNN}
+```
+Counter is **global per year** — never resets by month.
+
+Examples:
+* `FAC-03-2026-001` — first facture of March 2026
+* `FAC-04-2026-002` — second facture overall, created in April (no reset)
+
+This ensures facture numbering is always strictly sequential regardless of creation date.
+
+## DocumentSequence Schema
+
+Supports two unique constraint modes:
+
+* `@@unique([prefix, month, year])` — used by Devis (monthly reset)
+* `@@unique([prefix, year])` — used by Factures (yearly global counter)
+
+`month` is optional (`Int?`) — facture rows leave it null.
+
 ## Data Integrity
 
 * Cascading deletes on Document → Designation relations
@@ -134,6 +167,38 @@ Reset password response shape:
 | POST   | /tier       |                     | Create tier (auto-generates ID)     |
 | PATCH  | /tier/:id   |                     | Update tier fields                  |
 | DELETE | /tier/:id   |                     | Delete tier                         |
+
+## Documents
+
+| Method | Route                  | Query Params                                                        | Description                              |
+|--------|------------------------|---------------------------------------------------------------------|------------------------------------------|
+| GET    | /document/stats        | —                                                                   | Dashboard statistics                     |
+| GET    | /document              | type, page, limit, dateFrom, dateTo, dueDateFrom, dueDateTo         | Paginated list with filters              |
+| GET    | /document/:id          | —                                                                   | Single document with tier + designations |
+| POST   | /document              | —                                                                   | Create document + designations           |
+| PATCH  | /document/:id          | —                                                                   | Update document fields                   |
+| POST   | /document/:id/convert  | —                                                                   | Convert devis → facture                  |
+| DELETE | /document/:id          | —                                                                   | Delete document                          |
+
+> ⚠️ `GET /document/stats` must be declared **before** `GET /document/:id` in the controller to avoid NestJS matching `"stats"` as a route param.
+
+### Stats response shape
+
+```json
+{
+  "ca": 24850.000,
+  "totalClients": 38,
+  "totalFournisseurs": 14,
+  "devisEnAttente": 7,
+  "facturesNonPayees": 3,
+  "devisAcceptesThisMonth": 12,
+  "caTrend": 12,
+  "devisTrend": 8,
+  "recentActivity": []
+}
+```
+
+`caTrend` and `devisTrend` are percentage change vs previous month. `null` when no previous month data exists.
 
 Pagination response shape:
 

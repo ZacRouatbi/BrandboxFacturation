@@ -21,6 +21,8 @@ interface DataTableProps<T> {
   addLabel?: string;
   searchPlaceholder?: string;
   searchKeys?: (keyof T)[];
+  searchValue?: string;
+  onSearchChange?: (v: string) => void;
   isLoading?: boolean;
   isError?: boolean;
   page?:       number;
@@ -37,6 +39,8 @@ export default function DataTable<T extends { id: string | number }>({
   addLabel = "Nouveau",
   searchPlaceholder = "Rechercher...",
   searchKeys = [],
+  searchValue,
+  onSearchChange,
   isLoading = false,
   isError = false,
   page = 1,
@@ -44,17 +48,23 @@ export default function DataTable<T extends { id: string | number }>({
   onPageChange,
 }: DataTableProps<T>) {
   const { dark } = useTheme();
-  const [query, setQuery] = useState("");
+  const [internalQuery, setInternalQuery] = useState("");
 
-  const filtered = useMemo(() =>
-    query.trim()
-      ? data.filter((row) =>
-          searchKeys.some((key) =>
-            String(row[key]).toLowerCase().includes(query.toLowerCase())
-          )
-        )
-      : data,
-  [query, data, searchKeys]);
+  // Controlled mode: parent drives search value + pre-filters data.
+  // Uncontrolled mode: internal state + searchKeys filtering.
+  const isControlled = searchValue !== undefined && onSearchChange !== undefined;
+  const query        = isControlled ? searchValue : internalQuery;
+  const setQuery     = isControlled ? onSearchChange : setInternalQuery;
+
+  const filtered = useMemo(() => {
+    if (!query.trim()) return data;
+    if (isControlled) return data; // parent already pre-filtered
+    return data.filter((row) =>
+      searchKeys.some((key) =>
+        String(row[key]).toLowerCase().includes(query.toLowerCase())
+      )
+    );
+  }, [query, data, searchKeys, isControlled]);
 
   const pageNumbers = useMemo(() => {
     if (totalPages <= 7) {

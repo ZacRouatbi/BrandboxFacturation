@@ -94,13 +94,13 @@ model Document {
   }
 
 model DocumentSequence {
-  id      Int @id @default(autoincrement())
   prefix  String
-  month   Int
+  month   Int?
   year    Int
   counter Int
 
-  @@unique([prefix, month, year])
+  @@unique([prefix, month, year], name: "prefix_month_year")
+  @@unique([prefix, year], name: "prefix_year")
 }
 
 model Designation {
