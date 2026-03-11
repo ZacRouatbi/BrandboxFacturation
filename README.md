@@ -1,9 +1,10 @@
-# Brandbox Facturation Backend
+# Brandbox Facturation
 
-Backend API for internal billing system (Devis & Factures).
+Internal billing system for managing Devis & Factures.
 
-Built with:
+## Stack
 
+### Backend
 * NestJS
 * Prisma
 * MySQL
@@ -12,6 +13,12 @@ Built with:
 * Throttler
 * Class Validator
 * Nodemailer (OVH SMTP)
+
+### Frontend
+* Next.js 15 (App Router)
+* TailwindCSS
+* TanStack Query (React Query)
+* Fully mobile responsive
 
 ---
 
@@ -219,7 +226,7 @@ Pagination response shape:
 * Provider: OVH SMTP (`ssl0.ovh.net:587` STARTTLS)
 * Template: Mobile-responsive dark HTML email with Brandbox branding
 * Used for: Password reset link delivery only
-* Logo hosted via postimg CDN
+* Logo served as base64 inline — no external dependency
 
 ---
 
@@ -287,6 +294,28 @@ npm run test
 
 ---
 
+# 🖥 Frontend Development
+
+Run frontend:
+
+```
+npm run dev
+```
+
+Build frontend:
+
+```
+npm run build
+```
+
+Frontend environment variable:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+---
+
 # 📦 Deployment Notes
 
 * Use `prisma migrate deploy` in production
@@ -301,13 +330,14 @@ npm run test
 
 # 🏁 Status
 
-Backend is:
+Project is:
 
-* Structurally stable
-* Security hardened (auth-scoped rate limiting, token-based reset)
-* Indexed for performance
-* Paginated at the database level (skip/take)
-* Migration aligned
+* Fully functional — Devis, Factures, Clients, Fournisseurs, Dashboard
+* Fully mobile responsive — all pages, modals, panels and auth screens
+* Security hardened — auth-scoped rate limiting, token-based reset, JWT httpOnly cookies
+* Indexed for performance — DB-level pagination and query optimization
+* Print-ready — Devis and Facture print views
+* Migration-ready — migration SQL generated from legacy DB
 * Production-ready
 
 Further changes should only be bug fixes or feature extensions.

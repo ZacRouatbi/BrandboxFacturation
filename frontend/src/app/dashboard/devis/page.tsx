@@ -2,7 +2,6 @@
 "use client";
 
 import DateInput from "@/components/dashboard/Dateinput";
-
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import Topbar from "@/components/dashboard/Topbar";
@@ -28,7 +27,6 @@ export default function DevisPage() {
   const totalPages = data?.totalPages ?? 1;
   const total      = data?.total      ?? 0;
 
-  // Client-side search on current page by id or tier name
   const filtered = useMemo(() => {
     if (!search.trim()) return allDevis;
     const q = search.toLowerCase();
@@ -41,7 +39,6 @@ export default function DevisPage() {
 
   const columns = useMemo(() => getDevisColumns(), []);
 
-  // Snap back if page exceeds totalPages
   useEffect(() => {
     if (!isLoading && !isFetching && page > totalPages && totalPages > 0) {
       setTimeout(() => setPage(totalPages), 0);
@@ -53,75 +50,57 @@ export default function DevisPage() {
     setPage(Math.ceil((total + 1) / PAGE_SIZE));
   }, [total]);
 
+  const dateInputClass = `rounded-xl border px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#FBAE17] ${
+    dark ? "border-neutral-700 bg-neutral-800 text-white [color-scheme:dark]" : "border-neutral-200 bg-white text-black [color-scheme:light]"
+  }`;
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <Topbar title="Devis" />
 
-      <main className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+      <main className="flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-6 space-y-4">
 
         {/* Date filters */}
-        <div className={`flex flex-wrap items-end gap-4 rounded-2xl border px-5 py-4 ${
+        <div className={`rounded-2xl border px-4 py-4 sm:px-5 ${
           dark ? "border-neutral-800 bg-neutral-900/70" : "border-amber-100 bg-white/70 shadow-sm"
         }`}>
-          <div>
-            <p className={`mb-1.5 text-xs font-medium uppercase tracking-widest ${
-              dark ? "text-neutral-500" : "text-neutral-400"
-            }`}>Date de création</p>
-            <div className="flex items-center gap-2">
-              <DateInput
-                value={filters.dateFrom ?? ""}
-                onChange={(v) => { setFilters((f) => ({ ...f, dateFrom: v || undefined })); setPage(1); }}
-                className={`rounded-xl border px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#FBAE17] [color-scheme:${dark ? "dark" : "light"}] ${
-                  dark ? "border-neutral-700 bg-neutral-800 text-white" : "border-neutral-200 bg-white text-black"
-                }`}
-              />
-              <span className={`text-xs ${dark ? "text-neutral-600" : "text-neutral-400"}`}>→</span>
-              <DateInput
-                value={filters.dateTo ?? ""}
-                onChange={(v) => { setFilters((f) => ({ ...f, dateTo: v || undefined })); setPage(1); }}
-                className={`rounded-xl border px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#FBAE17] [color-scheme:${dark ? "dark" : "light"}] ${
-                  dark ? "border-neutral-700 bg-neutral-800 text-white" : "border-neutral-200 bg-white text-black"
-                }`}
-              />
-            </div>
-          </div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
 
-          <div>
-            <p className={`mb-1.5 text-xs font-medium uppercase tracking-widest ${
-              dark ? "text-neutral-500" : "text-neutral-400"
-            }`}>Échéance</p>
-            <div className="flex items-center gap-2">
-              <DateInput
-                value={filters.dueDateFrom ?? ""}
-                onChange={(v) => { setFilters((f) => ({ ...f, dueDateFrom: v || undefined })); setPage(1); }}
-                className={`rounded-xl border px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#FBAE17] [color-scheme:${dark ? "dark" : "light"}] ${
-                  dark ? "border-neutral-700 bg-neutral-800 text-white" : "border-neutral-200 bg-white text-black"
-                }`}
-              />
-              <span className={`text-xs ${dark ? "text-neutral-600" : "text-neutral-400"}`}>→</span>
-              <DateInput
-                value={filters.dueDateTo ?? ""}
-                onChange={(v) => { setFilters((f) => ({ ...f, dueDateTo: v || undefined })); setPage(1); }}
-                className={`rounded-xl border px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#FBAE17] [color-scheme:${dark ? "dark" : "light"}] ${
-                  dark ? "border-neutral-700 bg-neutral-800 text-white" : "border-neutral-200 bg-white text-black"
-                }`}
-              />
+            <div>
+              <p className={`mb-1.5 text-xs font-medium uppercase tracking-widest ${dark ? "text-neutral-500" : "text-neutral-400"}`}>
+                Date de création
+              </p>
+              <div className="flex items-center gap-2">
+                <DateInput value={filters.dateFrom ?? ""} onChange={(v) => { setFilters((f) => ({ ...f, dateFrom: v || undefined })); setPage(1); }} className={dateInputClass} />
+                <span className={`text-xs ${dark ? "text-neutral-600" : "text-neutral-400"}`}>→</span>
+                <DateInput value={filters.dateTo ?? ""} onChange={(v) => { setFilters((f) => ({ ...f, dateTo: v || undefined })); setPage(1); }} className={dateInputClass} />
+              </div>
             </div>
-          </div>
 
-          {(filters.dateFrom || filters.dateTo || filters.dueDateFrom || filters.dueDateTo) && (
-            <button
-              onClick={() => { setFilters({}); setPage(1); }}
-              className={`rounded-xl border px-3 py-2 text-xs font-medium transition hover:opacity-80 ${
-                dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500"
-              }`}
-            >
-              Effacer les filtres
-            </button>
-          )}
+            <div>
+              <p className={`mb-1.5 text-xs font-medium uppercase tracking-widest ${dark ? "text-neutral-500" : "text-neutral-400"}`}>
+                Échéance
+              </p>
+              <div className="flex items-center gap-2">
+                <DateInput value={filters.dueDateFrom ?? ""} onChange={(v) => { setFilters((f) => ({ ...f, dueDateFrom: v || undefined })); setPage(1); }} className={dateInputClass} />
+                <span className={`text-xs ${dark ? "text-neutral-600" : "text-neutral-400"}`}>→</span>
+                <DateInput value={filters.dueDateTo ?? ""} onChange={(v) => { setFilters((f) => ({ ...f, dueDateTo: v || undefined })); setPage(1); }} className={dateInputClass} />
+              </div>
+            </div>
+
+            {(filters.dateFrom || filters.dateTo || filters.dueDateFrom || filters.dueDateTo) && (
+              <button
+                onClick={() => { setFilters({}); setPage(1); }}
+                className={`self-start rounded-xl border px-3 py-2 text-xs font-medium transition hover:opacity-80 sm:self-end ${
+                  dark ? "border-neutral-700 text-neutral-400" : "border-neutral-300 text-neutral-500"
+                }`}
+              >
+                Effacer les filtres
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Table */}
         <DataTable
           title="Liste des devis"
           subtitle={`${total} devis enregistrés`}

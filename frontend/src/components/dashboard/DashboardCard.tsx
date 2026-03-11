@@ -31,7 +31,7 @@ export default function DashboardCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.08 }}
-      className={`relative overflow-hidden rounded-2xl border p-5 transition-colors duration-500 ${
+      className={`relative overflow-hidden rounded-2xl border p-3 sm:p-5 transition-colors duration-500 ${
         accent
           ? "border-[#FBAE17]/30 bg-[#FBAE17] text-black shadow-lg shadow-[#FBAE17]/20"
           : dark
@@ -39,35 +39,28 @@ export default function DashboardCard({
           : "border-amber-100 bg-white/70 backdrop-blur-xl shadow-sm"
       }`}
     >
-      {/* Background glow for accent card */}
       {accent && (
         <div className="pointer-events-none absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
       )}
 
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p
-            className={`text-xs font-medium uppercase tracking-widest ${
-              accent ? "text-black/60" : dark ? "text-neutral-500" : "text-neutral-400"
-            }`}
-          >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <p className={`truncate text-xs font-medium uppercase tracking-widest ${
+            accent ? "text-black/60" : dark ? "text-neutral-500" : "text-neutral-400"
+          }`}>
             {title}
           </p>
-          <p className={`mt-2 text-3xl font-bold tracking-tight ${accent ? "text-black" : ""}`}>
+          <p className={`mt-1.5 truncate text-xl font-bold tracking-tight sm:text-3xl ${accent ? "text-black" : ""}`}>
             {value}
           </p>
           {subtitle && (
-            <p className={`mt-1 text-xs ${accent ? "text-black/60" : dark ? "text-neutral-500" : "text-neutral-400"}`}>
+            <p className={`mt-0.5 text-xs ${accent ? "text-black/60" : dark ? "text-neutral-500" : "text-neutral-400"}`}>
               {subtitle}
             </p>
           )}
           {trend && (
-            <p className={`mt-2 text-xs font-medium ${
-              accent
-                ? "text-black/70"
-                : positive
-                ? "text-emerald-500"
-                : "text-red-400"
+            <p className={`mt-1.5 text-xs font-medium ${
+              accent ? "text-black/70" : positive ? "text-emerald-500" : "text-red-400"
             }`}>
               {positive ? "↑" : "↓"} {Math.abs(trend.value)}% {trend.label}
             </p>
@@ -75,16 +68,11 @@ export default function DashboardCard({
         </div>
 
         {/* Icon */}
-        <div
-          className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-            accent
-              ? "bg-black/10"
-              : dark
-              ? "bg-neutral-800 text-[#FBAE17]"
-              : "bg-amber-50 text-[#FBAE17]"
-          }`}
-        >
-          <Icon size={20} />
+        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10 ${
+          accent ? "bg-black/10" : dark ? "bg-neutral-800 text-[#FBAE17]" : "bg-amber-50 text-[#FBAE17]"
+        }`}>
+          <Icon size={16} className="sm:hidden" />
+          <Icon size={20} className="hidden sm:block" />
         </div>
       </div>
     </motion.div>

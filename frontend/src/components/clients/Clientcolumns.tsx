@@ -1,10 +1,6 @@
 import { Tier } from "@/types/tier.types";
 import ClientActionButtons from "./Clientactionbuttons";
 
-// Column definitions for the clients DataTable.
-// onEdit is passed in from the page so the action buttons
-// can trigger the edit panel state that lives in the page.
-
 export function getClientColumns(onEdit: (row: Tier) => void) {
   return [
     {
@@ -38,9 +34,7 @@ export function getClientColumns(onEdit: (row: Tier) => void) {
       key: "actions",
       label: "Actions",
       align: "right" as const,
-      render: (r: Tier) => (
-        <ClientActionButtons row={r} onEdit={onEdit} />
-      ),
+      render: (r: Tier) => <ClientActionButtons row={r} onEdit={onEdit} />,
     },
   ];
 }

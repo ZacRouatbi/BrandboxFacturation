@@ -18,6 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "BrandBox",
   description: "Facturation BrandBox",
+   icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default async function RootLayout({
