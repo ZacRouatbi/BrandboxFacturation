@@ -311,7 +311,7 @@ npm run build
 Frontend environment variable:
 
 ```
-FRONTEND_URL=http://localhost:3001
+NEST_BASEURL=
 ```
 
 ---
