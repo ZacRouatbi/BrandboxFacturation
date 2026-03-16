@@ -311,7 +311,7 @@ npm run build
 Frontend environment variable:
 
 ```
-NEXT_PUBLIC_API_URL=http://localhost:3001
+FRONTEND_URL=http://localhost:3001
 ```
 
 ---
