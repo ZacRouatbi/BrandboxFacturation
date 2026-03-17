@@ -63,13 +63,14 @@ CREATE TABLE `Document` (
 
 -- CreateTable
 CREATE TABLE `DocumentSequence` (
-    `prefix` VARCHAR(191) NOT NULL,
+    `prefix` INTEGER NOT NULL AUTO_INCREMENT,
     `month` INTEGER NULL,
     `year` INTEGER NOT NULL,
     `counter` INTEGER NOT NULL,
 
     UNIQUE INDEX `DocumentSequence_prefix_month_year_key`(`prefix`, `month`, `year`),
-    UNIQUE INDEX `DocumentSequence_prefix_year_key`(`prefix`, `year`)
+    UNIQUE INDEX `DocumentSequence_prefix_year_key`(`prefix`, `year`),
+    PRIMARY KEY (`prefix`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable

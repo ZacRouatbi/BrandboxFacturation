@@ -13,7 +13,7 @@ async function bootstrap() {
 
   app.use(helmet());
   app.enableCors({
-    origin: 'http://localhost:3001',    // your Next.js frontend
+    origin: 'www.facturation.brandbox.tn',    // your Next.js frontend
     credentials: true,                  // required for httpOnly cookies to be sent/received
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
