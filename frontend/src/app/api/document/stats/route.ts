@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const res = await fetch(`${process.env.NEST_BASEURL}/document/stats`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_NEST_JS}/document/stats`, {
     cache: "no-store",
   });
   const data = await res.json();

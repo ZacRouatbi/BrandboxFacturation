@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API = process.env.NEST_BASEURL ?? "http://localhost:3001";
+const API = process.env.NEXT_PUBLIC_NEST_JS ?? "http://localhost:3001";
 
 export async function POST(
   req: NextRequest,

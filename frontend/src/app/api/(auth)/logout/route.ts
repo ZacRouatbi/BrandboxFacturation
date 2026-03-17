@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API = process.env.NEST_BASEURL ?? "http://localhost:3000";
+const API = process.env.NEXT_PUBLIC_NEST_JS ?? "http://localhost:3000";
 
 // Two things happen here:
 // 1. We call NestJS POST /auth/logout, forwarding the cookie header
