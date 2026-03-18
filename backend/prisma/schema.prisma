@@ -94,7 +94,8 @@ model Document {
   }
 
 model DocumentSequence {
-  prefix  Int @id @default(autoincrement())
+  id      Int    @id @default(autoincrement())
+  prefix  String
   month   Int?
   year    Int
   counter Int
