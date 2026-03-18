@@ -1,4 +1,4 @@
-const BASE = process.env.NEST_BASEURL ?? "http://localhost:3000";
+const BASE = process.env.NEXT_PUBLIC_NEST_JS ?? "http://localhost:3000";
 
 // Single configured fetch wrapper used by every hook.
 // credentials: "include" ensures the httpOnly cookie is sent
