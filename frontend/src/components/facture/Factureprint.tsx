@@ -616,7 +616,7 @@ export default function FacturePrint({ devis }: FacturePrintProps) {
               </div>
               <div className="footer-item-text">
                 <span className="label">Téléphone</span>
-                <span className="value">+216 94 11 00 00</span>
+                <span className="value">+216 94 110 000</span>
               </div>
             </div>
             <div className="footer-divider" />
