@@ -97,7 +97,6 @@ export default function DevisPrint({ devis }: DevisPrintProps) {
 
     .page {
       width: 210mm;
-      
       margin: 0 auto;
       padding: 0;
       display: flex;
@@ -147,6 +146,7 @@ export default function DevisPrint({ devis }: DevisPrintProps) {
     .body {
       flex: 1;
       padding: 20px 40px;
+      padding-bottom: 80px !important;
     }
 
     /* ── Client info ── */
@@ -335,42 +335,49 @@ export default function DevisPrint({ devis }: DevisPrintProps) {
     }
 
     .signature-line {
-      border-top: 1.5px solid #ddd;
+      border-top: 1px solid #ddd;
       width: 100%;
     }
 
-    /* ── Footer — fixed to bottom of every printed page ── */
+    /* ── Footer ── */
     .footer {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       border-top: 1.5px solid #eee;
-      padding: 14px 40px;
+      padding: 10px 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: #f7f7f9;
-      font-size: 9.5px;
-      color: #888;
-      gap: 12px;
+      gap: 10px;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
     }
 
     .footer-logo img {
-      height: 28px;
-      opacity: 0.85;
+      height: 30px;
+      width: auto;
+      object-fit: contain;
+      display: block;
     }
 
     .footer-item {
       display: flex;
       flex-direction: row;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
+      flex-shrink: 0;
     }
 
     .footer-item-icon {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       background: #1a1a2e;
       border-radius: 6px;
       display: flex;
@@ -380,8 +387,8 @@ export default function DevisPrint({ devis }: DevisPrintProps) {
     }
 
     .footer-item-icon svg {
-      width: 13px;
-      height: 13px;
+      width: 12px;
+      height: 12px;
       stroke: #FBAE17;
       fill: none;
       stroke-width: 2;
@@ -397,21 +404,26 @@ export default function DevisPrint({ devis }: DevisPrintProps) {
 
     .footer-item-text .label {
       font-weight: 700;
-      font-size: 9px;
+      font-size: 8.5px;
       color: #1a1a2e;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .footer-item-text .value {
-      font-size: 9px;
+      font-size: 8.5px;
       color: #666;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 130px;
     }
 
     .footer-divider {
       width: 1px;
-      height: 28px;
+      height: 26px;
       background: #ddd;
+      flex-shrink: 0;
     }
 
     @media print {
@@ -419,9 +431,6 @@ export default function DevisPrint({ devis }: DevisPrintProps) {
       .page { width: 100%; }
       .footer { position: fixed; bottom: 0; left: 0; right: 0; }
     }
-
-    /* Space at bottom so content never hides behind the fixed footer */
-    .body { padding-bottom: 70px !important; }
   </style>
 </head>
 <body>
@@ -444,10 +453,7 @@ export default function DevisPrint({ devis }: DevisPrintProps) {
           {/* Header */}
           <div className="header">
             <div className="header-logo">
-              <img
-                src="/logo-dark.png"
-                alt="Brandbox"
-              />
+              <img src="/logo-dark.png" alt="Brandbox" />
             </div>
             <div className="header-right">
               <h1>Devis</h1>
@@ -463,8 +469,6 @@ export default function DevisPrint({ devis }: DevisPrintProps) {
 
             {/* Seller + Buyer side by side */}
             <div className="info-row">
-
-              {/* Seller — Brandbox */}
               <div className="client-box seller">
                 <h3>Vendeur</h3>
                 <div className="client-row">
@@ -489,11 +493,10 @@ export default function DevisPrint({ devis }: DevisPrintProps) {
                 </div>
                 <div className="client-row">
                   <span className="client-label">RIB :</span>
-                  <span className="client-value">08902000161001814557</span>
+                  <span className="client-value">08009000681003323005</span>
                 </div>
               </div>
 
-              {/* Buyer — Client */}
               <div className="client-box">
                 <h3>Informations client</h3>
                 <div className="client-row">
@@ -519,7 +522,6 @@ export default function DevisPrint({ devis }: DevisPrintProps) {
                   </div>
                 )}
               </div>
-
             </div>
 
             {/* Designations table */}
@@ -607,6 +609,8 @@ export default function DevisPrint({ devis }: DevisPrintProps) {
 
           {/* Footer */}
           <div className="footer">
+
+            {/* Logo */}
             <div className="footer-logo">
               <img src="/logo-dark.png" alt="Brandbox" />
             </div>
@@ -618,7 +622,7 @@ export default function DevisPrint({ devis }: DevisPrintProps) {
                 <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.81a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               </div>
               <div className="footer-item-text">
-                <span className="label">Téléphone</span>
+             
                 <span className="value">+216 94 110 000</span>
               </div>
             </div>
@@ -630,8 +634,19 @@ export default function DevisPrint({ devis }: DevisPrintProps) {
                 <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               </div>
               <div className="footer-item-text">
-                <span className="label">Contact</span>
+              
                 <span className="value">contact@brandbox.tn</span>
+              </div>
+            </div>
+            <div className="footer-divider" />
+
+            {/* Website */}
+            <div className="footer-item">
+              <div className="footer-item-icon">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              </div>
+              <div className="footer-item-text">
+             
                 <span className="value">www.brandbox.tn</span>
               </div>
             </div>
@@ -643,24 +658,12 @@ export default function DevisPrint({ devis }: DevisPrintProps) {
                 <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
               </div>
               <div className="footer-item-text">
-                <span className="label">Adresse</span>
+               
                 <span className="value">Rue Slayem Ammar Sahloul 1</span>
                 <span className="value">4054 Sousse, Tunisie</span>
               </div>
             </div>
-            <div className="footer-divider" />
 
-            {/* MF / RIB */}
-            <div className="footer-item">
-              <div className="footer-item-icon">
-                <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-              </div>
-              <div className="footer-item-text">
-                <span className="label">MF / RIB</span>
-                <span className="value">1605746/G/M/000</span>
-                <span className="value">08009000681003323005</span>
-              </div>
-            </div>
           </div>
 
         </div>

@@ -486,7 +486,7 @@ export default function FacturePrint({ devis }: FacturePrintProps) {
                 </div>
                 <div className="client-row">
                   <span className="client-label">RIB :</span>
-                  <span className="client-value">08902000161001814557</span>
+                  <span className="client-value">08009000681003323005</span>
                 </div>
               </div>
 
@@ -627,7 +627,7 @@ export default function FacturePrint({ devis }: FacturePrintProps) {
                 <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               </div>
               <div className="footer-item-text">
-                <span className="label">Contact</span>
+                <span className="label">Email</span>
                 <span className="value">contact@brandbox.tn</span>
                 <span className="value">www.brandbox.tn</span>
               </div>
